@@ -231,7 +231,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const T=i=>TOP0+i*AH;
-const fmt=n=>{if(n<10000)return String(Math.floor(n));const u=[[1e15,'Q'],[1e12,'T'],[1e9,'B'],[1e6,'M'],[1e3,'K']];for(const [v,l] of u)if(n>=v){const x=n/v;return(x<100?x.toFixed(1):Math.floor(x))+l}};
+const fmt=n=>{if(!isFinite(n))return '0';if(n<0)return '-'+fmt(-n);if(n<10000)return String(Math.floor(n));const u=[[1e15,'Q'],[1e12,'T'],[1e9,'B'],[1e6,'M'],[1e3,'K']];for(const [v,l] of u)if(n>=v){const x=n/v;return(x<100?x.toFixed(1):Math.floor(x))+l}};
 
 /* ---------- area design ---------- */
 const DISH=[{n:'寿司',f:1},{n:'鍋',f:2},{n:'焼き魚定食',f:3},{n:'海鮮丼',f:4},{n:'刺身大皿',f:5},{n:'舟盛り',f:6}];
@@ -300,7 +300,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');
     S.A=d.A.map(x=>{const n=newArea();Object.assign(n,x);n.lv=Object.assign(newArea().lv,x.lv);n.paid=Object.assign(newArea().paid,x.paid);n.inc=0;n.netProg=[0,0,0];n.anim=[0,0,0];return n});
     while(S.A.length<S.open)S.A.push(newArea());player.stack=Array.isArray(d.stack)?d.stack:[]}}catch(e){}
   initFish();syncWorkers()}
-let noSave=false;
+let noSave=false,overpayT=0;
 function save(){if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify({wallet:S.wallet,served:S.served,open:S.open,A:S.A,stack:player.stack,noren:S.noren||0,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0}))}catch(e){}}
 load();
 
@@ -487,6 +487,9 @@ function update(dt){
     else payAcc[id]=0;
   }
   if(!payHold)holdT=0;
+  overpayT-=dt;if(overpayT<=0){overpayT=.5;
+    for(let i=0;i<S.open;i++)for(const p of padsFor(i)){const a=S.A[p.i];if(p.k==='noren'||!p.show()||a.lv[p.k]>=p.max)continue;
+      const c=cost(p);if(a.paid[p.k]>=c&&c>0){S.wallet+=a.paid[p.k]-c;a.paid[p.k]=c;levelUp(p);break}}}
   curPad=onPad;if(!onPad)payHold=false;
   workers.forEach(w=>updWorker(w,dt));
   statsTick(dt);mileTick(dt);
@@ -1280,8 +1283,8 @@ function render3d(dt){
     if(a.lv.fisher>0)charPose(B.fisher,214,z.netY[0]-38,-Math.PI/2,t*5);
     for(let k=1;k<=a.lv.nets;k++)charPose(B.fisher,214,z.netY[k]+30,-Math.PI/2,t*5+k);
     for(const pg of o.pads){const {p,fill,lab}=pg.userData,show=p.show();pg.visible=show;if(!show)continue;
-      const lv=a.lv[p.k],mx=lv>=p.max,cst=cost(p),fr=mx?1:a.paid[p.k]/cst;fill.scale.z=Math.max(.001,fr);fill.position.z=1.4-1.4*fr;fill.visible=fr>0;
-      const rem=mx?'MAX':fmt(cst-a.paid[p.k]),lvT=p.k==='unlock'||p.max===1?'':'Lv '+lv+'/'+p.max;
+      const lv=a.lv[p.k],mx=lv>=p.max,cst=cost(p),fr=mx?1:Math.min(1,a.paid[p.k]/cst);fill.scale.z=Math.max(.001,fr);fill.position.z=1.4-1.4*fr;fill.visible=fr>0;
+      const rem=mx?'MAX':fmt(Math.max(0,cst-a.paid[p.k])),lvT=p.k==='unlock'||p.max===1?'':'Lv '+lv+'/'+p.max;
       setLabel(lab,p.name+rem+lvT,(g,w,h)=>{g.fillStyle='rgba(22,32,58,.86)';rr(g,6,6,w-12,h-12,40);g.fill();g.textAlign='center';
         g.fillStyle='#ffffff';g.font=`800 60px ${FONT}`;g.fillText(p.name,w/2,84);g.fillStyle='rgba(255,255,255,.65)';g.font=`500 34px ${FONT}`;if(lvT)g.fillText(lvT,w-90,130);
         if(mx){g.fillStyle='#ffe08a';g.font=`800 70px ${FONT}`;g.fillText('MAX',w/2,200)}
@@ -1373,7 +1376,7 @@ paused=true;
  tStart.focus();}
 
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!paused)update(dt);render3d(dt);
-  if(curPad){payBtn.hidden=false;const a=S.A[curPad.i],rem=cost(curPad)-a.paid[curPad.k],ok=S.wallet>0;payBtn.classList.toggle('off',!ok);
+  if(curPad){payBtn.hidden=false;const a=S.A[curPad.i],rem=Math.max(0,cost(curPad)-a.paid[curPad.k]),ok=S.wallet>0;payBtn.classList.toggle('off',!ok);
     const tt=ok?(payHold?'ジェムを使っています…':(kbd?'スペース長押しでジェムを使う':'長押しでジェムを使う')):'ジェムが足りません',ss=curPad.name+'　あと '+fmt(rem);if(payT.textContent!==tt)payT.textContent=tt;if(payS.textContent!==ss)payS.textContent=ss}
   else{payBtn.hidden=true;payBtn.classList.remove('on')}
   updAreaDot();shopUI(dt);infoUI(dt);
