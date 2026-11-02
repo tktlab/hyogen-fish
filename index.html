@@ -74,9 +74,13 @@ html,body{height:100%;overflow:hidden;background:var(--ice);color:var(--snow);fo
 @media (prefers-reduced-motion:reduce){#aurora{animation:none}}
 #info{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 96px);display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none;max-width:72%}
 .ipill{background:var(--panel);color:#fff;font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;white-space:nowrap}
-#vipCard{pointer-events:auto;background:#fff6dc;color:#3a2a10;border-radius:12px;padding:8px 10px;font-size:12px;box-shadow:0 3px 0 rgba(10,14,28,.3);display:flex;flex-direction:column;gap:3px;border:2px solid #e2b23c}
-#vipCard b{font-size:12px}#vipCard .vrow.done{color:#13804a;text-decoration:line-through}#vipCard .vtime{color:#8a5a14}
-#vipCard button{margin-top:3px;border:0;border-radius:999px;background:#2f6fd0;color:#fff;font:800 11px var(--font);padding:5px 10px;cursor:pointer}
+#vipCard{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px;max-width:100%}
+#vipCard .vtop{border:2px solid #e2b23c;background:#fff6dc;color:#3a2a10;border-radius:999px;padding:4px 10px;font:800 11px var(--font);cursor:pointer;white-space:nowrap;box-shadow:0 2px 0 rgba(10,14,28,.3)}
+#vipCard .vgo{border:0;border-radius:999px;background:#2f6fd0;color:#fff;font:800 11px var(--font);padding:5px 10px;cursor:pointer}
+#vipCard .vlist{flex-basis:100%;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+#vipCard b,#vipCard .vrow{text-align:right;font-size:11px;color:#3a2a10;background:rgba(255,246,220,.94);padding:2px 8px;border-radius:6px}
+#vipCard .vrow.done{color:#13804a;text-decoration:line-through}
+#vipCard button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 #cutin{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;overflow:hidden;cursor:pointer;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 #cutin{--acc:#ffd23a;--acc2:#ff9a2a}#cutin.ci-ice{--acc:#8fe3ff;--acc2:#3b8fd0}#cutin.ci-sun{--acc:#ffe680;--acc2:#ffb03a}#cutin.ci-aurora{--acc:#6dffc0;--acc2:#a07bff}#cutin.ci-fest{--acc:#ff6a5a;--acc2:#ffc23a}
 .ci-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--acc) 30%,transparent),rgba(8,12,28,.88) 62%);opacity:0;transition:opacity .25s}
@@ -234,8 +238,9 @@ const DISH=[{n:'寿司',f:1},{n:'鍋',f:2},{n:'焼き魚定食',f:3},{n:'海鮮�
 const COLORS=['#f2c230','#3b8fd0','#ef6f9a','#4fb36a','#9b6bd6','#f08a3c','#3fb6b0','#c94f4f'];
 const LAP=['','極・','天・','神・'];
 function cfg(i){const d=DISH[i%DISH.length],lap=Math.floor(i/DISH.length),f=i+1;
-  return{name:(lap?LAP[Math.min(lap,3)]+(lap>3?lap:''):'')+d.n,f,price:Math.round(f*7.5*Math.pow(1.6,i)*(1+.5*(S.noren||0))*(WX.type==='fubuki'?1.5:1)),K:Math.pow(2.6,i),color:COLORS[i%8]}}
-const unlockCost=i=>Math.round(250*Math.pow(2.6,i-1));
+  return{name:(lap?LAP[Math.min(lap,3)]+(lap>3?lap:''):'')+d.n,f,price:Math.round(f*7.5*Math.pow(1.6,i)*(1+.5*(S.noren||0))*(WX.type==='fubuki'?1.5:1)),K:ECO(i),color:COLORS[i%8]}}
+const ECO=i=>(i+1)*Math.pow(1.6*1.08,i);
+const unlockCost=i=>Math.round(250*ECO(i-1));
 const ZC=[];
 function Z(i){if(!ZC[i]){const y=T(i);ZC[i]={netPad:{x:240,y:y+100},fish:{x:330,y:y+100},stIn:{x:250,y:y+280},dish:{x:412,y:y+280},
   cnt:{x:575,y:y+100},gem:{x:552,y:y+205},netY:[y+100,y+250,y+400]}}return ZC[i]}
@@ -773,20 +778,26 @@ function mileTick(dt){
 /* info UI (weather, special customer, branches) */
 const wxPill=document.getElementById('wxPill'),vipCard=document.getElementById('vipCard'),norenPill=document.getElementById('norenPill');
 vipCard.addEventListener('pointerdown',e=>e.stopPropagation());
-let infoT=0;
+let infoT=0,vipOpen=false,vipAuto=0;
 const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 function infoUI(dt){infoT-=dt;if(infoT>0)return;infoT=.25;
   if(WX.type){wxPill.hidden=false;if(wxPill.dataset.t!==WX.type){wxPill.dataset.t=WX.type;wxPill.textContent='';const im=document.createElement('img');im.src=ASSETS['wx_'+WX.type];im.alt='';wxPill.append(im,document.createElement('span'))}
     const s=WXT[WX.type].n+'　あと'+mmss(WX.t),sp=wxPill.lastChild;if(sp.textContent!==s)sp.textContent=s}else wxPill.hidden=true;
   if(S.noren){norenPill.hidden=false;const s='のれん '+S.noren+'号店　+'+fmt(branchRate())+'/秒';if(norenPill.textContent!==s)norenPill.textContent=s}else norenPill.hidden=true;
-  if(VIP){vipCard.hidden=false;const key=JSON.stringify([VIP.i,VIP.order.map(o=>o.got),Math.ceil(VIP.t),warpReady(),areaAt(player.y)]);
-    if(vipCard.dataset.k!==key){vipCard.dataset.k=key;vipCard.textContent='';
-      const h=document.createElement('b');h.textContent='特別なお客さん（エリア'+(VIP.i+1)+'・'+VIP.who+'）';vipCard.appendChild(h);
-      for(const o of VIP.order){const r=document.createElement('div');r.className='vrow'+(o.got>=o.n?' done':'');r.textContent=cfg(o.a).name+'（エリア'+(o.a+1)+'）　'+o.got+'/'+o.n;vipCard.appendChild(r)}
-      const tl=document.createElement('div');tl.className='vtime';tl.textContent='のこり '+mmss(VIP.t);vipCard.appendChild(tl);
-      if(warpReady()&&areaAt(player.y)!==VIP.i){const b=document.createElement('button');b.type='button';b.textContent='このお客さんの所へ移動';
-        b.addEventListener('click',()=>{const i=VIP.i;fadeEl.style.opacity='1';sfx('warp');setTimeout(()=>{const s=vipSeat(i);player.x=s.x;player.y=s.y+40;snapCam=true;setTimeout(()=>fadeEl.style.opacity='0',60)},180)});vipCard.appendChild(b)}}}
-  else vipCard.hidden=true;
+  if(VIP){vipCard.hidden=false;const done=VIP.order.reduce((a,o)=>a+Math.min(o.got,o.n),0),tot=VIP.order.reduce((a,o)=>a+o.n,0);
+    if(!vipCard.firstChild){const top=document.createElement('button');top.type='button';top.className='vtop';
+      top.addEventListener('click',()=>{vipOpen=!vipOpen;clearTimeout(vipAuto);if(vipOpen)vipAuto=setTimeout(()=>{vipOpen=false;infoT=0},6000);infoT=0});
+      const go=document.createElement('button');go.type='button';go.className='vgo';go.textContent='移動';
+      go.addEventListener('click',()=>{if(!VIP)return;const i=VIP.i;fadeEl.style.opacity='1';sfx('warp');setTimeout(()=>{const s=vipSeat(i);player.x=s.x;player.y=s.y+40;snapCam=true;setTimeout(()=>fadeEl.style.opacity='0',60)},180)});
+      const list=document.createElement('div');list.className='vlist';vipCard.append(top,go,list)}
+    const [top,go,list]=vipCard.children;
+    const tt='特別客 エリア'+(VIP.i+1)+'　'+done+'/'+tot+'　'+mmss(VIP.t)+(vipOpen?' ▴':' ▾');if(top.textContent!==tt)top.textContent=tt;top.setAttribute('aria-expanded',String(vipOpen));
+    go.hidden=!(warpReady()&&areaAt(player.y)!==VIP.i);
+    const lk=vipOpen?JSON.stringify([VIP.who,VIP.order.map(o=>[o.a,o.got,o.n])]):'';
+    if(list.dataset.k!==lk){list.dataset.k=lk;list.textContent='';list.hidden=!vipOpen;
+      if(vipOpen){const h=document.createElement('b');h.textContent=VIP.who+'の注文';list.appendChild(h);
+        for(const o of VIP.order){const r=document.createElement('div');r.className='vrow'+(o.got>=o.n?' done':'');r.textContent=cfg(o.a).name+'（エリア'+(o.a+1)+'）　'+o.got+'/'+o.n;list.appendChild(r)}}}}
+  else{vipCard.hidden=true;vipOpen=false}
 }
 
 /* ================= 3D renderer ================= */
