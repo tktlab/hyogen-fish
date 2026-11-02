@@ -72,6 +72,7 @@ html,body{height:100%;overflow:hidden;background:var(--ice);color:var(--snow);fo
  filter:blur(6px);animation:aur 14s ease-in-out infinite alternate;-webkit-mask-image:linear-gradient(#000 35%,transparent);mask-image:linear-gradient(#000 35%,transparent)}
 @keyframes aur{0%{transform:translateX(-5%) skewX(-6deg)}100%{transform:translateX(5%) skewX(8deg)}}
 @media (prefers-reduced-motion:reduce){#aurora{animation:none}}
+body.bn-on #info{top:calc(env(safe-area-inset-top,0px) + 158px)}
 #info{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 96px);display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none;max-width:72%}
 .ipill{background:var(--panel);color:#fff;font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;white-space:nowrap}
 #vipCard{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px;max-width:100%}
@@ -108,11 +109,11 @@ html,body{height:100%;overflow:hidden;background:var(--ice);color:var(--snow);fo
 @keyframes ciSlide{to{transform:translateX(0);opacity:1}}
 @keyframes ciTw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.1) rotate(45deg)}}
 @keyframes ciOut{to{opacity:0;transform:scale(1.06)}}
-#banner{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 132px);z-index:30;display:flex;align-items:center;gap:10px;width:min(360px,calc(100% - 32px));padding:8px 14px 8px 8px;border-radius:16px;background:linear-gradient(100deg,#1b2648,#2a3a6c);color:#fff;box-shadow:0 6px 0 rgba(8,12,28,.4);border:2px solid var(--acc);transform:translate(-160%,0) skewX(-8deg)}
+#banner{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 96px);z-index:30;display:flex;align-items:center;gap:8px;width:min(300px,calc(100% - 32px));padding:5px 12px 5px 5px;border-radius:14px;background:linear-gradient(100deg,#1b2648,#2a3a6c);color:#fff;box-shadow:0 4px 0 rgba(8,12,28,.4);border:2px solid var(--acc);transform:translate(-160%,0) skewX(-8deg);pointer-events:none}
 #banner{--acc:#ffd23a}#banner.bn-ice{--acc:#8fe3ff}#banner.bn-fest{--acc:#ff6a5a}
-#banner img{width:68px;height:68px;object-fit:contain;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
-#banner img.card{background:#fff;border-radius:12px;padding:3px;object-fit:contain}
-.bn-txt{min-width:0}.bn-kick{font-size:11px;font-weight:800;color:var(--acc);letter-spacing:.06em}.bn-title{font-size:18px;font-weight:800;line-height:1.2}.bn-sub{font-size:12px;opacity:.85}
+#banner img{width:42px;height:42px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+#banner img.card{background:#fff;border-radius:8px;padding:2px;object-fit:contain}
+.bn-txt{min-width:0}.bn-kick{font-size:10px;font-weight:800;color:var(--acc);letter-spacing:.06em}.bn-title{font-size:15px;font-weight:800;line-height:1.2}.bn-sub{font-size:11px;opacity:.85}
 #banner.in{animation:bnIn .45s cubic-bezier(.2,1.2,.4,1) forwards}#banner.out{animation:bnOut .3s ease-in forwards}
 @keyframes bnIn{to{transform:translate(-50%,0) skewX(0)}}@keyframes bnOut{from{transform:translate(-50%,0)}to{transform:translate(60%,0);opacity:0}}
 #wxPill img{width:18px;height:18px;vertical-align:-4px;margin-right:4px}
@@ -604,9 +605,9 @@ function nextCut(){const o=CUT.q.shift();
 }
 function endCut(){clearTimeout(CUT.timer);cutEl.classList.add('out');setTimeout(nextCut,320)}
 cutEl.addEventListener('pointerdown',e=>{e.stopPropagation();if(performance.now()-CUT.t0>600)endCut()});
-function banner(o){BAN.q.push(o);if(!BAN.busy)nextBan()}
-function nextBan(){const o=BAN.q.shift();if(!o){BAN.busy=false;banEl.hidden=true;return}
-  BAN.busy=true;banEl.textContent='';banEl.className='bn-'+(o.theme||'gold');
+function banner(o){if(BAN.q.length>=2)BAN.q.shift();BAN.q.push(o);if(!BAN.busy)nextBan()}
+function nextBan(){const o=BAN.q.shift();if(!o){BAN.busy=false;banEl.hidden=true;document.body.classList.remove('bn-on');return}
+  BAN.busy=true;document.body.classList.add('bn-on');banEl.textContent='';banEl.className='bn-'+(o.theme||'gold');
   if(o.img){const im=el('img',o.card?'card':'');im.src=o.img;im.alt='';banEl.appendChild(im)}
   const tx=el('div','bn-txt');if(o.kicker)tx.appendChild(el('div','bn-kick',o.kicker));tx.appendChild(el('div','bn-title',o.title));if(o.sub)tx.appendChild(el('div','bn-sub',o.sub));banEl.appendChild(tx);
   banEl.hidden=false;void banEl.offsetWidth;banEl.classList.add('in');if(o.sfx)sfx(o.sfx);
@@ -743,7 +744,7 @@ function spawnVip(){
   while(order.length<kinds){const a=pool.splice(Math.random()*pool.length|0,1)[0];order.push({a,n:1+(Math.random()*3|0),got:0})}
   order.sort((x,y)=>x.a-y.a);
   VIP={i,order,t:180,who:['旅人','村の長老','行商人'][Math.random()*3|0]};
-  cutin({imgs:[ASSETS[VIPIMG[VIP.who]]],theme:'gold',kicker:'特別なお客さん　来店！',title:VIP.who+'がやって来た',sub:'エリア'+(i+1)+'の特別席で待っています　注文：'+order.map(o=>cfg(o.a).name+'×'+o.n).join('、')+'（3分以内）',sfx:'coin'});
+  banner({img:ASSETS[VIPIMG[VIP.who]],theme:'gold',kicker:'特別なお客さん　エリア'+(i+1),title:VIP.who+'が来店！',sub:'右上の札から注文を確認（3分以内）',sfx:'coin',dur:3200});
 }
 function vipTick(dt){
   if(S.open<MS.vip){VIP=null;return}
@@ -752,16 +753,15 @@ function vipTick(dt){
   if(dist(player,seat)<R+8){for(const o of VIP.order){const tag='d'+o.a;let k;while(o.got<o.n&&(k=player.stack.lastIndexOf(tag))>=0){player.stack.splice(k,1);o.got++;sfx('drop');fly(tag,player.x,player.y-20,seat.x,seat.y-10,.3,30)}}
     if(VIP.order.every(o=>o.got>=o.n)){const g=VIP.order.reduce((s,o)=>s+o.n*cfg(o.a).price,0)*6;S.wallet+=g;S.vipDone=(S.vipDone||0)+1;
       for(let j=0;j<14;j++)fly('gem',seat.x,seat.y,seat.x+rnd(-70,70),seat.y+rnd(-70,30),.6,60);
-      float('ありがとう！ +'+fmt(g),seat.x,seat.y-50,'#ffe08a',20);cutin({imgs:[ASSETS[VIPIMG[VIP.who]]],theme:'gold',kicker:'注文達成！',title:'ありがとう！',sub:VIP.who+'から　+'+fmt(g)+'ジェム',dur:2800});VIP=null;vipNext=rnd(100,160);return}}
+      float('ありがとう！ +'+fmt(g),seat.x,seat.y-50,'#ffe08a',20);banner({img:ASSETS[VIPIMG[VIP.who]],theme:'gold',kicker:'注文達成！',title:'ありがとう！',sub:VIP.who+'から +'+fmt(g)+'ジェム',sfx:'level',dur:2600});VIP=null;vipNext=rnd(100,160);return}}
   if(VIP.t<=0){float(VIP.who+'は帰ってしまった',seat.x,seat.y-40,'#ffd0b0',15);banner({img:ASSETS[VIPIMG[VIP.who]],theme:'ice',kicker:'時間切れ',title:VIP.who+'は帰ってしまった',sub:'また来てくれるかも',dur:2400});VIP=null;vipNext=rnd(90,140)}
 }
 /* golden salmon: rolled on each haul */
 function goldRoll(i,cy){
   if(S.open<MS.gold)return;const a=S.A[i];if(Math.random()>=.05+.006*a.lv.net)return;
   const z=Z(i),g=cfg(i).price*12;fly('gfish',rnd(60,150),cy,z.gem.x,z.gem.y,.8,90,0,()=>{a.gem+=g});
-  if(!S.goldSeen){S.goldSeen=1;cutin({imgs:[ASSETS.gfish_card],theme:'gold',kicker:'大当たり！',title:'金の鮭を釣り上げた！',sub:'エリア'+(i+1)+'に +'+fmt(g)+'ジェム。網を伸ばすほどかかりやすくなります'})}
-  else banner({img:ASSETS.gfish_card,theme:'gold',kicker:'大当たり　エリア'+(i+1),title:'金の鮭！',sub:'+'+fmt(g)+'ジェム',sfx:'level',dur:2000});
-  if(Math.abs(player.y-cy)<500)float('金の鮭！ +'+fmt(g),z.fish.x,z.fish.y-50,'#ffd84a',20);
+  if(!S.goldSeen){S.goldSeen=1;banner({img:ASSETS.gfish_card,theme:'gold',kicker:'大当たり　エリア'+(i+1),title:'金の鮭を釣り上げた！',sub:'網を伸ばすほどかかりやすくなります',sfx:'level',dur:3000})}
+  if(Math.abs(player.y-cy)<420){float('金の鮭！ +'+fmt(g),z.fish.x,z.fish.y-50,'#ffd84a',20);sfx('coin')}
 }
 /* noren (prestige) */
 let branchAcc=0;const branchRate=()=>3*(Math.pow(2,S.noren||0)-1);
