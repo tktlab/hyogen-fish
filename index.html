@@ -297,11 +297,11 @@ function initFish(){fishes=[];const n=40*(S.open+1),yMax=T(S.open+1);
 function syncWorkers(){for(let i=0;i<S.open;i++){let have=workers.filter(w=>w.i===i).length;
   while(have<S.A[i].lv.carrier){workers.push({i,x:330,y:T(i)+360,stack:[],mode:null,from:null,xt:0,walk:0});have++}}}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');
-  if(d&&Array.isArray(d.A)){S.wallet=d.wallet||0;S.served=d.served||0;S.noren=d.noren||0;S.vipDone=d.vipDone||0;S.branches=Array.isArray(d.branches)?d.branches:Array.from({length:S.noren},(_,k)=>({no:k+1,open:30,rate:3*Math.pow(2,k),menu:''}));S.goldSeen=d.goldSeen||0;S.open=Math.max(1,d.open||1);
+  if(d&&Array.isArray(d.A)){S.wallet=d.wallet||0;S.served=d.served||0;S.noren=d.noren||0;S.vipDone=d.vipDone||0;S.branches=Array.isArray(d.branches)?d.branches:[];while(S.branches.length<S.noren)S.branches.push({no:S.branches.length+1,open:30,rate:0,menu:''});S.goldSeen=d.goldSeen||0;S.open=Math.max(1,d.open||1);
     S.A=d.A.map(x=>{const n=newArea();Object.assign(n,x);n.lv=Object.assign(newArea().lv,x.lv);n.paid=Object.assign(newArea().paid,x.paid);n.inc=0;n.netProg=[0,0,0];n.anim=[0,0,0];return n});
     while(S.A.length<S.open)S.A.push(newArea());player.stack=Array.isArray(d.stack)?d.stack:[]}}catch(e){}
   initFish();syncWorkers()}
-let noSave=false,overpayT=0;
+let noSave=false,overpayT=0,legacyFixed=false;
 function save(){if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify({wallet:S.wallet,served:S.served,open:S.open,A:S.A,stack:player.stack,noren:S.noren||0,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0,branches:S.branches||[]}))}catch(e){}}
 load();
 
@@ -494,6 +494,9 @@ function update(dt){
   curPad=onPad;if(!onPad)payHold=false;
   workers.forEach(w=>updWorker(w,dt));
   statsTick(dt);mileTick(dt);
+  if(!legacyFixed){legacyFixed=true;let ch=false;for(const b of (S.branches||[]))if(!b.menu&&b.rate<1000){const nr=S.noren;S.noren=0;let est=0;for(let i=0;i<30;i++)est+=cfg(i).price;S.noren=nr;
+      b.rate=Math.round(est*1.2*BRANCH_SHARE);b.menu=DISH[29%DISH.length].n;ch=true}
+    if(ch){save();banner({img:ASSETS.noren,theme:'fest',kicker:'のれん分けした店',title:'1号店の稼ぎが届くようになりました',sub:'毎秒 +'+fmt(branchRate())+' ジェム',dur:4500})}}
   updCustomers(dt);
   for(const f of flyers){f.t+=dt/f.dur;if(f.t>=1&&!f.done){f.done=1;f.cb&&f.cb()}}
   flyers=flyers.filter(f=>!f.done);
