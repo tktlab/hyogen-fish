@@ -297,12 +297,12 @@ function initFish(){fishes=[];const n=40*(S.open+1),yMax=T(S.open+1);
 function syncWorkers(){for(let i=0;i<S.open;i++){let have=workers.filter(w=>w.i===i).length;
   while(have<S.A[i].lv.carrier){workers.push({i,x:330,y:T(i)+360,stack:[],mode:null,from:null,xt:0,walk:0});have++}}}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');
-  if(d&&Array.isArray(d.A)){S.wallet=d.wallet||0;S.served=d.served||0;S.noren=d.noren||0;S.vipDone=d.vipDone||0;S.goldSeen=d.goldSeen||0;S.open=Math.max(1,d.open||1);
+  if(d&&Array.isArray(d.A)){S.wallet=d.wallet||0;S.served=d.served||0;S.noren=d.noren||0;S.vipDone=d.vipDone||0;S.branches=Array.isArray(d.branches)?d.branches:Array.from({length:S.noren},(_,k)=>({no:k+1,open:30,rate:3*Math.pow(2,k),menu:''}));S.goldSeen=d.goldSeen||0;S.open=Math.max(1,d.open||1);
     S.A=d.A.map(x=>{const n=newArea();Object.assign(n,x);n.lv=Object.assign(newArea().lv,x.lv);n.paid=Object.assign(newArea().paid,x.paid);n.inc=0;n.netProg=[0,0,0];n.anim=[0,0,0];return n});
     while(S.A.length<S.open)S.A.push(newArea());player.stack=Array.isArray(d.stack)?d.stack:[]}}catch(e){}
   initFish();syncWorkers()}
 let noSave=false,overpayT=0;
-function save(){if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify({wallet:S.wallet,served:S.served,open:S.open,A:S.A,stack:player.stack,noren:S.noren||0,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0}))}catch(e){}}
+function save(){if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify({wallet:S.wallet,served:S.served,open:S.open,A:S.A,stack:player.stack,noren:S.noren||0,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0,branches:S.branches||[]}))}catch(e){}}
 load();
 
 /* ---------- input ---------- */
@@ -686,6 +686,10 @@ function bar(label,v){const w=document.createElement('div');w.className='gz';con
   const b=document.createElement('i');const f=document.createElement('b');const q=Math.max(0,Math.min(1,1-v));f.style.width=Math.round(q*100)+'%';
   f.className=q>.7?'ok':q>.4?'mid':'bad';b.appendChild(f);w.append(l,b);return w}
 function renderShop(){shopList.textContent='';const cur=areaAt(player.y);
+  for(const b of (S.branches||[])){const card=document.createElement('div');card.className='sc br';
+    const top=document.createElement('div');top.className='st';const no=document.createElement('span');no.className='no';no.style.background='#16203b';no.textContent=b.no;
+    const nm=document.createElement('span');nm.className='nm';nm.textContent=b.no+'号店（のれん分け済み）';const chip=document.createElement('span');chip.className='chip good';chip.textContent='自動で営業中';
+    top.append(no,nm,chip);card.appendChild(top);const nums=document.createElement('div');nums.className='nums';nums.textContent='エリア'+b.open+'まで'+(b.menu?'（'+b.menu+'）':'')+'　毎秒 +'+fmt(b.rate)+' ジェムがあなたに届く';card.appendChild(nums);shopList.appendChild(card)}
   for(let i=0;i<S.open;i++){const c=cfg(i),h=health(i),card=document.createElement('div');card.className='sc';
     const top=document.createElement('div');top.className='st';const no=document.createElement('span');no.className='no';no.style.background=c.color;no.textContent=i+1;
     const nm=document.createElement('span');nm.className='nm';nm.textContent=c.name+(i===cur?'（いまここ）':'');
@@ -764,13 +768,17 @@ function goldRoll(i,cy){
   if(Math.abs(player.y-cy)<420){float('金の鮭！ +'+fmt(g),z.fish.x,z.fish.y-50,'#ffd84a',20);sfx('coin')}
 }
 /* noren (prestige) */
-let branchAcc=0;const branchRate=()=>3*(Math.pow(2,S.noren||0)-1);
+let branchAcc=0;const BRANCH_SHARE=0.003;
+const branchRate=()=>(S.branches||[]).reduce((a,b)=>a+b.rate,0);
+function shopRateNow(){let meas=0,est=0;for(let i=0;i<S.open;i++){meas+=health(i).gemsMin/60;est+=cfg(i).price}return Math.max(meas,est*.5)}
 function norenDo(){
-  const keep={noren:(S.noren||0)+1,served:S.served,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0};
-  S={wallet:0,served:keep.served,open:1,A:[newArea()],noren:keep.noren,vipDone:keep.vipDone,goldSeen:keep.goldSeen};
-  player.stack=[];player.x=420;player.y=170;workers=[];custs=[];flyers=[];floats=[];VIP=null;vipNext=45;WX.type=null;WX.next=150;SLED.area=0;SLED.y=T(0)+205;
+  const no=(S.noren||0)+1,rate=Math.max(3,Math.round(shopRateNow()*BRANCH_SHARE));
+  const branches=(S.branches||[]).concat([{no,open:S.open,rate,menu:cfg(S.open-1).name}]);
+  const keep={noren:no,served:S.served,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0};
+  S={wallet:0,served:keep.served,open:1,A:[newArea()],noren:keep.noren,vipDone:keep.vipDone,goldSeen:keep.goldSeen,branches};
+  player.stack=[];player.x=420;player.y=170;workers=[];custs=[];flyers=[];floats=[];VIP=null;vipNext=45;WX.type=null;WX.next=150;SLED.area=0;SLED.y=T(0)+205;ST.length=0;branchAcc=0;
   curPad=null;payHold=false;initFish();resetWorld3d();snapCam=true;save();
-  cutin({imgs:[ASSETS.noren],theme:'fest',kicker:'のれん分け',title:S.noren+'号店、オープン！',sub:'のれん分けした店から毎秒'+fmt(branchRate())+'ジェムが届き、料理も高く売れます'});
+  cutin({imgs:[ASSETS.noren],theme:'fest',kicker:'のれん分け',title:(no+1)+'号店、オープン！',sub:no+'号店は自動で営業を続け、毎秒 +'+fmt(rate)+' ジェムをあなたに届けます'});
 }
 let pendingNoren=false;
 function mileTick(dt){
@@ -786,7 +794,7 @@ const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%6
 function infoUI(dt){infoT-=dt;if(infoT>0)return;infoT=.25;
   if(WX.type){wxPill.hidden=false;if(wxPill.dataset.t!==WX.type){wxPill.dataset.t=WX.type;wxPill.textContent='';const im=document.createElement('img');im.src=ASSETS['wx_'+WX.type];im.alt='';wxPill.append(im,document.createElement('span'))}
     const s=WXT[WX.type].n+'　あと'+mmss(WX.t),sp=wxPill.lastChild;if(sp.textContent!==s)sp.textContent=s}else wxPill.hidden=true;
-  if(S.noren){norenPill.hidden=false;const s='のれん '+S.noren+'号店　+'+fmt(branchRate())+'/秒';if(norenPill.textContent!==s)norenPill.textContent=s}else norenPill.hidden=true;
+  if(S.noren){norenPill.hidden=false;const s=(S.noren+1)+'号店営業中　支店から +'+fmt(branchRate())+'/秒';if(norenPill.textContent!==s)norenPill.textContent=s}else norenPill.hidden=true;
   if(VIP){vipCard.hidden=false;const done=VIP.order.reduce((a,o)=>a+Math.min(o.got,o.n),0),tot=VIP.order.reduce((a,o)=>a+o.n,0);
     if(!vipCard.firstChild){const top=document.createElement('button');top.type='button';top.className='vtop';
       top.addEventListener('click',()=>{vipOpen=!vipOpen;clearTimeout(vipAuto);if(vipOpen)vipAuto=setTimeout(()=>{vipOpen=false;infoT=0},6000);infoT=0});
