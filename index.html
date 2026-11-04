@@ -285,6 +285,18 @@ body.kbd #keyhelp{display:block}
 .newst{border:2px dashed #22c36b}
 .cand{display:flex;align-items:center;gap:8px}
 .cand .onm small{font-size:11px}
+.rrow{display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:6px 10px;font-size:13px}
+.rrow img{width:36px;height:36px;object-fit:contain;flex:none}.rrow.lv img{border-radius:50%}.rrow.ask img{border-radius:8px;object-fit:cover}
+.rrow span{flex:1;min-width:0}.rrow b{white-space:nowrap;color:#13804a;font-variant-numeric:tabular-nums}.rrow.lv b{color:#a0620a}.rrow.ask b{color:#c2461a}
+#report{position:fixed;inset:0;z-index:45;background:rgba(10,14,28,.65);display:flex;align-items:center;justify-content:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#report .card{position:relative;width:min(350px,100%);max-height:88vh;overflow-y:auto;background:#f4f1ea;color:#1f2b3a;border-radius:22px;padding:18px 16px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 0 rgba(8,12,28,.35)}
+#report h2{margin:0 0 0 58px;font-size:19px}#report #repSub{margin:0 0 8px 58px;font-size:12px;color:#4a5566}
+.rown{position:absolute;left:12px;top:8px;height:64px;width:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+#repList{display:flex;flex-direction:column;gap:6px}
+.rtot{display:flex;justify-content:space-between;align-items:baseline;padding:6px 4px 0;border-top:2px dashed #d7dbe3;font-weight:800}.rtot b{font-size:22px;color:#13804a}
+#repOk{border:0;border-radius:14px;padding:13px 0;font:800 16px var(--font);background:#22c36b;color:#fff;cursor:pointer;box-shadow:0 4px 0 #138a4a}
+#repOk:focus-visible{outline:3px solid #2f6fd0;outline-offset:2px}
+.rnote{margin:0;font-size:11px;color:#6a7486;text-align:center;line-height:1.5}
 .oc .gz{grid-template-columns:4.2em 1fr}
 .onote{margin:0;font-size:11px;color:#6a7486;line-height:1.6}
 </style>
@@ -322,6 +334,7 @@ body.kbd #keyhelp{display:block}
 <div class="row"><button id="xCopy" type="button">リンクをコピー</button><button id="xShare" type="button" hidden>LINEなどで送る</button></div></div>
 <div class="xpane" hidden><p>送る側の端末でコピーしたリンクを、ここに貼り付けてください。QRコードやリンクを開いた場合は、自動で受け取り画面になります。</p><textarea id="xIn" placeholder="https://tktlab.github.io/hyogen-fish/#data=…" aria-label="引き継ぎリンク"></textarea><div id="xMsg"></div><div class="row"><button id="xRecv" type="button">受け取る</button></div></div>
 <button id="xClose" type="button">閉じる</button></div></div>
+<div id="report" hidden><div class="card" role="dialog" aria-labelledby="repH"><img class="rown" src="" alt="" id="repImg"><h2 id="repH">留守中の日報</h2><p id="repSub"></p><div id="repList"></div><div class="rtot"><span>合計</span><b id="repTot"></b></div><button id="repOk" type="button">受け取る</button><p class="rnote" id="repNote"></p></div></div>
 <div id="cutin" hidden></div>
 <div id="banner" hidden></div>
 <div id="toast" hidden><b id="toastT"></b><span id="toastS"></span></div>
@@ -341,7 +354,7 @@ const W=720,AH=600,TOP0=20;
 const TRIAL=/[?&]trial=owner\b/.test(location.search),KEY=TRIAL?'hyogen-fish-3d-trial-fc':'hyogen-fish-3d-v1';
 if(TRIAL){try{if(!localStorage.getItem(KEY)){const z=()=>({net:0,fisher:0,nets:0,carrier:0,ad:0,cook:0,bag:0,unlock:0,sled:0,noren:0});const A=[];
   for(let i=0;i<30;i++){const lv=Object.assign(z(),{net:8,fisher:5,nets:2,carrier:5,ad:6,cook:6,unlock:i<29?1:0,noren:i===29?1:0});if(i===0)lv.bag=10;if(i===9)lv.sled=4;A.push({lv,paid:z(),fish:0,stIn:0,dish:0,cnt:0,gem:0,cookT:0,spawnT:0,served:0})}
-  localStorage.setItem(KEY,JSON.stringify({wallet:1e10,served:120000,open:30,stack:[],noren:0,vipDone:3,goldSeen:1,hq:0,ownerSeen:1,fc:1,reg:0,lastAt:Date.now()-5*60e3,A,
+  localStorage.setItem(KEY,JSON.stringify({wallet:1e10,served:120000,open:30,stack:[],noren:0,vipDone:3,goldSeen:1,hq:0,ownerSeen:1,fc:1,reg:0,honRate:1e8,lastAt:Date.now()-10*60e3,A,
     branches:[{no:1,site:1,slot:0,open:30,menu:'祭りの大舟盛り',mgr:{name:'ユキ',face:0,trait:'ryori',lv:1,xp:0,sk:{ryori:3,sekkyaku:2,dandori:2},mood:70,praiseT:0}},
               {no:2,site:2,slot:0,open:30,menu:'祭りの大舟盛り',mgr:{name:'コタロウ',face:1,trait:'sekkyaku',lv:1,xp:0,sk:{ryori:2,sekkyaku:3,dandori:1},mood:55,praiseT:0}}]}))}}catch(e){}}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -413,12 +426,12 @@ function initFish(){fishes=[];const n=40*(S.open+1),yMax=T(S.open+1);
 function syncWorkers(){for(let i=0;i<S.open;i++){let have=workers.filter(w=>w.i===i).length;
   while(have<S.A[i].lv.carrier){workers.push({i,x:330,y:T(i)+360,stack:[],mode:null,from:null,xt:0,walk:0});have++}}}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');
-  if(d&&Array.isArray(d.A)){S.wallet=d.wallet||0;S.served=d.served||0;S.noren=d.noren||0;S.vipDone=d.vipDone||0;S.branches=Array.isArray(d.branches)?d.branches:[];while(S.branches.length<S.noren)S.branches.push({no:S.branches.length+1,open:30,rate:0,menu:''});S.goldSeen=d.goldSeen||0;S.hq=d.hq||0;S.ownerSeen=d.ownerSeen||0;S.fc=d.fc||0;S.reg=d.reg||0;S.migrated=d.migrated||0;S.lastAt=d.lastAt||0;S.open=Math.max(1,d.open||1);
+  if(d&&Array.isArray(d.A)){S.wallet=d.wallet||0;S.served=d.served||0;S.noren=d.noren||0;S.vipDone=d.vipDone||0;S.branches=Array.isArray(d.branches)?d.branches:[];while(S.branches.length<S.noren)S.branches.push({no:S.branches.length+1,open:30,rate:0,menu:''});S.goldSeen=d.goldSeen||0;S.hq=d.hq||0;S.ownerSeen=d.ownerSeen||0;S.fc=d.fc||0;S.reg=d.reg||0;S.migrated=d.migrated||0;S.honRate=+d.honRate||0;S.ask=d.ask&&typeof d.ask==='object'?d.ask:null;S.askQ=Array.isArray(d.askQ)?d.askQ.slice(0,3):[];S.lastAt=d.lastAt||0;S.open=Math.max(1,d.open||1);
     S.A=d.A.map(x=>{const n=newArea();Object.assign(n,x);n.lv=Object.assign(newArea().lv,x.lv);n.paid=Object.assign(newArea().paid,x.paid);n.inc=0;n.netProg=[0,0,0];n.anim=[0,0,0];return n});
     while(S.A.length<S.open)S.A.push(newArea());player.stack=Array.isArray(d.stack)?d.stack:[]}}catch(e){}
   initFish();syncWorkers()}
 let noSave=false,overpayT=0,legacyFixed=false;
-function save(){if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify({wallet:S.wallet,served:S.served,open:S.open,A:S.A,stack:player.stack,noren:S.noren||0,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0,branches:S.branches||[],hq:S.hq||0,ownerSeen:S.ownerSeen||0,fc:S.fc||0,reg:S.reg||0,migrated:S.migrated||0,lastAt:Date.now()}))}catch(e){}}
+function save(){if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify({wallet:S.wallet,served:S.served,open:S.open,A:S.A,stack:player.stack,noren:S.noren||0,vipDone:S.vipDone||0,goldSeen:S.goldSeen||0,branches:S.branches||[],hq:S.hq||0,ownerSeen:S.ownerSeen||0,fc:S.fc||0,reg:S.reg||0,migrated:S.migrated||0,honRate:S.honRate||0,ask:S.ask||null,askQ:S.askQ||[],lastAt:Date.now()}))}catch(e){}}
 load();
 
 /* ---------- input ---------- */
@@ -431,6 +444,7 @@ const KEYMAP={ArrowLeft:'L',KeyA:'L',ArrowRight:'R',KeyD:'R',ArrowUp:'U',KeyW:'U
 addEventListener('keydown',e=>{const k=KEYMAP[e.code];if(k){keys[k]=true;e.preventDefault();if(!kbd){kbd=true;document.body.classList.add('kbd');hint.textContent='矢印キーで移動';}}
   if(e.code==='Escape'){const se=document.getElementById('site');if(se&&!se.hidden){se.hidden=true;return}if(typeof closeWarp==='function')closeWarp();const sh=document.getElementById('shop');if(sh)sh.hidden=true;if(typeof CUT!=='undefined'&&CUT.busy)endCut()}
   if((e.code==='Enter'||e.code==='NumpadEnter')&&typeof CUT!=='undefined'&&CUT.busy){e.preventDefault();endCut()}
+  else if((e.code==='Enter'||e.code==='NumpadEnter')){const rp=document.getElementById('report');if(rp&&!rp.hidden){e.preventDefault();document.getElementById('repOk').click()}}
   if(e.code==='KeyE'&&typeof warpReady==='function'&&warpReady()&&!paused){warpEl.hidden?openWarp():closeWarp()}
   if((e.code==='KeyO'||e.code==='KeyM')&&!paused){const np=document.getElementById('norenPill');if(np&&!np.hidden)np.click()}
   if(e.code==='KeyQ'&&!paused){const sh=document.getElementById('shopb');if(sh&&!sh.hidden)sh.click()}},{capture:true});
@@ -1488,7 +1502,7 @@ let last=performance.now(),saveT=0;
 const MGR_NAMES=['ユキ','コタロウ','ハナ','ゲンジ','ミナト','サク','トモエ','レン','アオイ','ジンベエ','フブキ','カイ'];
 const SKILLS=[{k:'ryori',n:'料理',d:'1皿の値段が上がる'},{k:'sekkyaku',n:'接客',d:'お客さんが増える'},{k:'dandori',n:'段取り',d:'回転が速くなる'}];
 const TRAITS={ryori:'料理人肌',sekkyaku:'看板店長',dandori:'段取り名人'};
-const SK_MAX=10,MGR_MAX=20,AWAY_CAP=8*3600,AWAY_SHARE=.5,SLOTS=3,OPEN_G=1.18,AFF=1.4;
+const SK_MAX=10,MGR_MAX=20,AWAY_SHARE=.5,SLOTS=3,OPEN_G=1.18,AFF=1.4;
 const REGIONS=[
  {n:'氷原',mul:1,bg:'linear-gradient(170deg,#21386e,#132650 55%,#0d1b3d)',sites:[
   {n:'港町',x:22,y:30,aff:'dandori',d:'船着き場のそば。段取り上手が活躍します'},
@@ -1573,9 +1587,12 @@ const ASKS=[
  {q:'料理大会に招待されました。出ますか？',a:[['出場する',(b,m)=>{if(m.sk.ryori>=5){const g=Math.round(effRate(b)*600);S.wallet+=g;return'優勝！ 賞金 +'+fmt(g)+'ジェム'}m.mood+=8;m.xp+=120;return'入賞ならず。でもいい経験に（料理Lv5で優勝のチャンス）'}],['断る',(b,m)=>'また次の機会に']]},
  {q:'店長が「少し休みがほしい」と言っています。',a:[['休ませる',(b,m)=>{b.rest=60;m.mood=100;return'1分休んで、やる気満タン！'}],['もう少し頑張って',(b,m)=>{m.mood-=20;b.bf={m:1.2,t:300};return'5分間 1.2倍（やる気 −20）'}]]},
 ];
-let ASK=null,askT=TRIAL?15:60,awayPending=0,ownerShown=false,honAcc=0,migShown=false;
+const awayCap=()=>(8+.8*Math.min(20,S.hq||0))*3600;
+let ASK=S.ask||null,askT=TRIAL?15:60,awayRep=null,honT=0,ownerShown=false,honAcc=0,migShown=false;
 function ownerTick(dt){
   if(!S.fc&&migrateNoren())save();
+  honT+=dt;if(honT>=5){honT=0;let r=0,warm=true;for(let i=0;i<S.open;i++){r+=health(i).gemsMin/60;if(stOf(i).warm<1)warm=false}if(warm&&r>0)S.honRate=S.honRate?S.honRate*.8+r*.2:r}
+  if(awayRep&&document.getElementById('title').hidden&&!paused&&CUT&&!CUT.busy)showReport();
   if(!S.fc)return;
   /* 本店の売上は自動で社長のもとへ */
   honAcc+=dt;if(honAcc>=1){honAcc=0;for(let i=0;i<S.open;i++){const a=S.A[i];if(a.gem>0){S.wallet+=a.gem;a.gem=0}}}
@@ -1587,17 +1604,41 @@ function ownerTick(dt){
     m.mood+=(60-m.mood)*Math.min(1,dt/300);m.mood=Math.max(0,Math.min(100,m.mood));
     if(m.lv<MGR_MAX){m.xp+=dt;if(m.xp>=xpNeed(m)){m.xp-=xpNeed(m);m.lv++;
       banner({img:mgrImg(m),theme:'gold',kicker:siteOf(b).n+'店',title:m.name+'店長が Lv'+m.lv+' に！',sub:'ロイヤリティ +'+fmt(effRate(b))+'/秒',dur:2400})}}}
-  if(!ASK&&bs.length){askT-=dt;if(askT<=0){const b=bs[Math.random()*bs.length|0];ASK={no:b.no,i:Math.random()*ASKS.length|0};
+  if(!ASK&&bs.length){askT-=dt;if(askT<=0){const b=bs[Math.random()*bs.length|0];ASK=S.ask={no:b.no,i:Math.random()*ASKS.length|0};
     banner({img:mgrImg(ensureMgr(b)),theme:'gold',kicker:siteOf(b).n+'店 '+b.mgr.name+'店長',title:'社長、相談です',sub:'地図の上の相談カードから答えてください',sfx:'coin',dur:3000})}}
   const tHidden=document.getElementById('title').hidden;
-  if(awayPending&&tHidden&&!paused){const g=awayPending;awayPending=0;
-    cutin({imgs:[ASSETS.owner],theme:'fest',kicker:'おかえりなさい、社長',title:'+'+fmt(g)+' ジェム',sub:'留守の間に'+bs.length+'店のロイヤリティが届きました（最大8時間・半分の速さ）'})}
   if(S.migrated&&!migShown&&tHidden&&!paused){migShown=true;S.migrated=0;save();
     cutin({imgs:[ASSETS.owner,ASSETS.hq0],theme:'fest',kicker:'リニューアル',title:'フランチャイズ編になりました',sub:'のれん分けした店は地図の上のフランチャイズ店に、本店は30エリアまで育った店になりました。もう魚を運ばなくて大丈夫です'})}
   if(tHidden&&!paused&&mapEl.hidden&&!ownerShown){ownerShown=true;if(!S.ownerSeen){S.ownerSeen=1}openMap()}
 }
-function awayCredit(){if(!S.fc&&!(S.noren>0))return;if(!(S.branches||[]).length||!S.lastAt)return;const el=Math.min(AWAY_CAP,(Date.now()-S.lastAt)/1000);if(!(el>60))return;
-  if(!S.fc)return;let g=0;for(const b of S.branches)g+=storeBase(b)*mgrMul(b)*hqMul();g=Math.round(g*el*AWAY_SHARE);if(g>0){S.wallet+=g;awayPending=g}}
+function nextAsk(){ASK=S.ask=(S.askQ&&S.askQ.length)?S.askQ.shift():null}
+/* 留守中の営業：閉じていた時間を、次に開いたときにまとめて進める */
+function awayCredit(){if(!S.lastAt)return;const raw=(Date.now()-S.lastAt)/1000;if(!(raw>60))return;const cap=awayCap(),el=Math.min(cap,raw);
+  if(!S.fc&&S.noren>0&&(S.branches||[]).length)migrateNoren();
+  const rep={raw,el,capped:raw>cap,hon:0,roy:0,stores:0,lvs:[],asks:0};
+  rep.hon=Math.round((S.honRate||0)*el*AWAY_SHARE);
+  if(S.fc){const bs=S.branches||[];rep.stores=bs.length;
+    for(const b of bs){const m=ensureMgr(b);rep.roy+=storeBase(b)*mgrMul(b)*hqMul()*el*AWAY_SHARE;
+      b.rest=0;b.bf=null;m.praiseT=0;m.mood=60+(m.mood-60)*Math.exp(-el/300);
+      const l0=m.lv;m.xp+=el;while(m.lv<MGR_MAX&&m.xp>=xpNeed(m)){m.xp-=xpNeed(m);m.lv++}if(m.lv>=MGR_MAX)m.xp=0;if(m.lv>l0)rep.lvs.push([m,l0,m.lv,siteOf(b).n])}
+    rep.roy=Math.round(rep.roy);
+    let n=Math.min(3,Math.floor(el/200));S.askQ=S.askQ||[];const have=(ASK?1:0)+S.askQ.length;n=Math.min(n,3-have);
+    for(let k=0;k<n;k++){const b=bs[Math.random()*bs.length|0];if(!b)break;const q={no:b.no,i:Math.random()*ASKS.length|0};if(!ASK)ASK=S.ask=q;else S.askQ.push(q);rep.asks++}}
+  if(rep.hon+rep.roy>0||rep.lvs.length||rep.asks)awayRep=rep}
+const repEl=document.getElementById('report');
+repEl.addEventListener('pointerdown',e=>e.stopPropagation());
+const hm=s=>{s=Math.floor(s/60);const h=Math.floor(s/60),m=s%60;return h?h+'時間'+(m?m+'分':''):m+'分'};
+function showReport(){const r=awayRep;awayRep=null;document.getElementById('repImg').src=ASSETS.owner;const L=document.getElementById('repList');L.textContent='';
+  document.getElementById('repSub').textContent=hm(r.raw)+'留守にしていました'+(r.capped?'（数えるのは'+hm(r.el)+'まで）':'');
+  const row=(img,t,v,cls)=>{const d=mk1('div','rrow'+(cls?' '+cls:''));if(img){const i=mk1('img');i.src=img;i.alt='';d.appendChild(i)}d.append(mk1('span',null,t),mk1('b',null,v));L.appendChild(d)};
+  if(r.hon>0)row(ASSETS.hq0,S.fc?'本店の売上':'お店の売上','+'+fmt(r.hon));
+  if(r.roy>0)row(ASSETS.shop1,'フランチャイズ '+r.stores+'店のロイヤリティ','+'+fmt(r.roy));
+  for(const [m,a,b,site] of r.lvs)row(mgrImg(m),site+'店 '+m.name+'店長','Lv'+a+' → '+b,'lv');
+  if(r.asks)row(ASSETS.ask0,'店長からの相談','届いています '+r.asks+'件','ask');
+  const tot=r.hon+r.roy;document.getElementById('repTot').textContent='+'+fmt(tot)+' ジェム';
+  const ok=document.getElementById('repOk');ok.onclick=()=>{S.wallet+=tot;repEl.hidden=true;sfx('level');for(let j=0;j<16;j++)fly('gem',player.x+rnd(-80,80),player.y-60,player.x,player.y,.6,60,j*.03);save()};
+  document.getElementById('repNote').textContent=S.fc?'留守中は半分の速さで営業します。本部を大きくすると、留守番できる時間が延びます（今は'+hm(awayCap())+'まで）':'留守中は半分の速さで営業します（最大'+hm(awayCap())+'）';
+  repEl.hidden=false;sfx('coin')}
 /* ---------- map (社長の画面) ---------- */
 const mapEl=document.getElementById('map'),mapBox=document.getElementById('mapBox'),mapAsk=document.getElementById('mapAsk'),siteEl=document.getElementById('site'),siteList=document.getElementById('siteList');
 const mk1=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
@@ -1629,12 +1670,12 @@ function renderMap(){mapRefs=[];const R=REGIONS[mapR];document.getElementById('m
     const prevOk=(S.reg||0)>=mapR-1;mapRefs.push(()=>{const c=regCost(mapR);bt.textContent=prevOk?'開拓する　'+fmt(c):'ひとつ前の地域を先に開拓';bt.disabled=!prevOk||S.wallet<c})}
   renderAsk();mapTick()}
 function renderAsk(){mapAsk.textContent='';const bs=S.branches||[];if(!ASK){mapAsk.hidden=true;return}
-  const b=bs.find(x=>x.no===ASK.no),A=ASKS[ASK.i];if(!b){ASK=null;mapAsk.hidden=true;return}mapAsk.hidden=false;const m=ensureMgr(b);
+  const b=bs.find(x=>x.no===ASK.no),A=ASKS[ASK.i];if(!b){nextAsk();mapAsk.hidden=true;return}mapAsk.hidden=false;const m=ensureMgr(b);
   const ai=mk1('img','aimg');ai.src=ASSETS['ask'+ASK.i];ai.alt='';const tx=mk1('div','atx');const fc=mk1('img','oface sm');fc.src=mgrImg(m);fc.alt='';
-  const hd=mk1('div','ahd');hd.append(fc,mk1('b',null,siteOf(b).n+'店 '+m.name+'店長から相談'));tx.append(hd,mk1('p','oq',A.q));
+  const hd=mk1('div','ahd');hd.append(fc,mk1('b',null,siteOf(b).n+'店 '+m.name+'店長から相談'+((S.askQ||[]).length?'（ほか'+S.askQ.length+'件）':'')));tx.append(hd,mk1('p','oq',A.q));
   const row=mk1('div','orow');A.a.forEach(([lab,fn],j)=>{const bt=mk1('button','obtn'+(j?' sub':''),lab+(j===0&&A.cost?'（'+fmt(A.cost(b))+'）':''));bt.type='button';
     if(j===0&&A.cost)mapRefs.push(()=>{bt.disabled=S.wallet<A.cost(b)});
-    bt.addEventListener('click',()=>{const r=fn(b,m);if(r==null){sfx('drop');return}m.mood=Math.max(0,Math.min(100,m.mood));ASK=null;askT=rnd(150,240);sfx('level');
+    bt.addEventListener('click',()=>{const r=fn(b,m);if(r==null){sfx('drop');return}m.mood=Math.max(0,Math.min(100,m.mood));nextAsk();askT=rnd(150,240);sfx('level');
       banner({img:mgrImg(m),theme:'gold',kicker:siteOf(b).n+'店 '+m.name+'店長',title:lab,sub:r,dur:2800});save();renderAsk();if(siteCur)renderSite()});row.appendChild(bt)});
   tx.appendChild(row);mapAsk.append(ai,tx)}
 function mapTick(){
