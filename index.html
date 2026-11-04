@@ -214,6 +214,12 @@ body.kbd #keyhelp{display:block}
 .go{align-self:flex-end;border:0;border-radius:999px;background:#2f6fd0;color:#fff;font:800 12px var(--font);padding:6px 12px;cursor:pointer}
 .achip{position:absolute;left:0;top:0;white-space:nowrap;font-weight:800;font-size:12px;background:#ff7a45;color:#fff;padding:4px 10px;border-radius:999px;box-shadow:0 3px 0 rgba(10,14,28,.35)}
 #joyk{width:48px;height:48px;background:rgba(255,255,255,.85)}
+@media (max-width:430px){#hud{gap:5px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  #hud .pill{font-size:14px;padding:5px 9px 5px 7px;gap:4px}#hud .pill small{font-size:10px}
+  #shareBtn,#reset{font-size:11px;padding:7px 9px}}
+@media (max-width:370px){#hud .pill.vis{display:none}}
+body.map-on #banner{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 98px)}
+body.site-on #banner{top:calc(env(safe-area-inset-top,0px) + 8px);bottom:auto}
 #norenPill{pointer-events:auto;border:2px solid #ffc23a;background:#2a1f10;color:#ffe9b0;font:800 12px var(--font);cursor:pointer;position:relative}
 #norenPill.ask::after{content:"相談";position:absolute;top:-8px;left:-8px;background:#ff6a5a;color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;animation:pulse 1s ease-in-out infinite}
 #norenPill:focus-visible{outline:2px solid #fff;outline-offset:2px}
@@ -245,9 +251,11 @@ body.kbd #keyhelp{display:block}
 .oart{width:100%;max-height:190px;object-fit:cover;border-radius:12px}
 .oshop{width:100%;height:130px;object-fit:contain;background:radial-gradient(ellipse at 50% 80%,#2a4580,#0d1b3d 75%);border-radius:12px;padding:6px 0}
 .oface{width:52px;height:52px;border-radius:50%;flex:none;box-shadow:0 0 0 2px #ffc23a}
+#map>*{width:100%;max-width:720px;margin-inline:auto}
+@media (max-width:400px){#map .pill{font-size:14px;padding:5px 8px 5px 6px}.mst{padding:3px 7px}.mst b{font-size:12px}#mapHon{padding:7px 10px;font-size:11px}.mtab{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline:4px}.mhd{gap:6px}}
 #map{position:fixed;inset:0;z-index:21;display:flex;flex-direction:column;gap:8px;background:#0b1430;color:#fff;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
 .mhd{display:flex;align-items:center;gap:8px}
-.mstat{display:flex;gap:6px;align-items:center;flex:1;min-width:0;flex-wrap:wrap}
+.mstat{display:flex;gap:6px;align-items:center;flex:1;min-width:0}
 .mst{display:flex;flex-direction:column;line-height:1.1;background:var(--panel);border-radius:10px;padding:3px 9px;font-variant-numeric:tabular-nums}.mst small{font-size:9px;opacity:.75}.mst b{font-size:13px}
 #mapHon{border:0;border-radius:999px;background:#ffd96a;color:#4a2a08;font:800 12px var(--font);padding:8px 12px;cursor:pointer;white-space:nowrap;box-shadow:0 3px 0 #b0661c}
 .mask{display:flex;gap:10px;background:#fff6f2;color:#1f2b3a;border:3px solid #ff6a5a;border-radius:14px;padding:8px}
@@ -263,7 +271,8 @@ body.kbd #keyhelp{display:block}
 .mroad{position:absolute;inset:0;width:100%;height:100%}.mroad polyline{fill:none;stroke:rgba(255,255,255,.35);stroke-width:.8;stroke-dasharray:2 1.6;vector-effect:non-scaling-stroke}
 .mroad polyline{stroke-width:3}
 .mflake{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff}
-.msite{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:#fff;cursor:pointer;font-family:var(--font);padding:0;width:38%}
+.msite{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:#fff;cursor:pointer;font-family:var(--font);padding:0;width:min(38%,21vh,170px)}
+@supports (width:1cqh){.mbox{container-type:size}.msite{width:min(38%,30cqh,170px)}}
 .msite img{width:100%;max-width:150px;aspect-ratio:1/0.85;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
 .msite img.empty{opacity:.45;filter:grayscale(.6) drop-shadow(0 6px 10px rgba(0,0,0,.5))}
 .msite b{font-size:13px;background:rgba(10,16,40,.75);padding:2px 10px;border-radius:999px;white-space:nowrap}
@@ -308,7 +317,7 @@ body.kbd #keyhelp{display:block}
 <div id="joyb" class="joy" hidden></div><div id="joyk" class="joy" hidden></div>
 <div id="hud">
   <div class="pill"><span class="gemi"></span><b id="wallet">0</b></div>
-  <div class="pill"><small>来客</small><b id="served">0</b></div>
+  <div class="pill vis"><small>来客</small><b id="served">0</b></div>
   <button class="pill" id="areaBtn" type="button" aria-label="エリアを選んで移動"><small>エリア</small><b id="areas">1</b><span id="areaDot" hidden></span></button>
   <button id="shareBtn" type="button">共有</button>
   <button id="reset" type="button">リセット</button>
@@ -318,7 +327,7 @@ body.kbd #keyhelp{display:block}
 <div id="info"><div id="wxPill" class="ipill" hidden></div><div id="vipCard" hidden></div><button id="norenPill" class="ipill" type="button" aria-label="フランチャイズの地図を開く" hidden></button></div>
 <div id="warp" hidden><div class="sheet" role="dialog" aria-label="エリアへ移動"><div class="hd">エリアへ移動<button id="warpX" type="button">閉じる</button></div><div id="warpList"></div></div></div>
 <div id="fade"></div>
-<div id="map" hidden><div class="mhd"><div class="mstat"><span class="pill"><span class="gemi"></span><b id="mWal">0</b></span><span class="mst"><small>フランチャイズ</small><b id="mStores"></b></span><span class="mst"><small>ロイヤリティ</small><b id="mRoy"></b></span></div><button id="mapHon" type="button">本店を見る</button></div>
+<div id="map" hidden><div class="mhd"><div class="mstat"><span class="pill"><span class="gemi"></span><b id="mWal">0</b></span><span class="mst"><small>フランチャイズ</small><b id="mStores"></b></span><span class="mst"><small>ロイヤリティ</small><b id="mRoy"></b></span></div><button id="mapHon" type="button">本店へ</button></div>
 <div id="mapAsk" class="mask" hidden></div>
 <div id="mapTabs" class="mtabs"></div>
 <div id="mapBox" class="mbox" role="group" aria-label="出店地の地図"></div>
@@ -442,7 +451,7 @@ const endJoy=e=>{if(joy&&joy.id===e.pointerId)joy=null};
 cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);
 const KEYMAP={ArrowLeft:'L',KeyA:'L',ArrowRight:'R',KeyD:'R',ArrowUp:'U',KeyW:'U',ArrowDown:'D',KeyS:'D'};let kbd=false;
 addEventListener('keydown',e=>{const k=KEYMAP[e.code];if(k){keys[k]=true;e.preventDefault();if(!kbd){kbd=true;document.body.classList.add('kbd');hint.textContent='矢印キーで移動';}}
-  if(e.code==='Escape'){const se=document.getElementById('site');if(se&&!se.hidden){se.hidden=true;return}if(typeof closeWarp==='function')closeWarp();const sh=document.getElementById('shop');if(sh)sh.hidden=true;if(typeof CUT!=='undefined'&&CUT.busy)endCut()}
+  if(e.code==='Escape'){const se=document.getElementById('site');if(se&&!se.hidden){document.getElementById('siteX').click();return}if(typeof closeWarp==='function')closeWarp();const sh=document.getElementById('shop');if(sh)sh.hidden=true;if(typeof CUT!=='undefined'&&CUT.busy)endCut()}
   if((e.code==='Enter'||e.code==='NumpadEnter')&&typeof CUT!=='undefined'&&CUT.busy){e.preventDefault();endCut()}
   else if((e.code==='Enter'||e.code==='NumpadEnter')){const rp=document.getElementById('report');if(rp&&!rp.hidden){e.preventDefault();document.getElementById('repOk').click()}}
   if(e.code==='KeyE'&&typeof warpReady==='function'&&warpReady()&&!paused){warpEl.hidden?openWarp():closeWarp()}
@@ -1632,7 +1641,7 @@ function showReport(){const r=awayRep;awayRep=null;document.getElementById('repI
   document.getElementById('repSub').textContent=hm(r.raw)+'留守にしていました'+(r.capped?'（数えるのは'+hm(r.el)+'まで）':'');
   const row=(img,t,v,cls)=>{const d=mk1('div','rrow'+(cls?' '+cls:''));if(img){const i=mk1('img');i.src=img;i.alt='';d.appendChild(i)}d.append(mk1('span',null,t),mk1('b',null,v));L.appendChild(d)};
   if(r.hon>0)row(ASSETS.hq0,S.fc?'本店の売上':'お店の売上','+'+fmt(r.hon));
-  if(r.roy>0)row(ASSETS.shop1,'フランチャイズ '+r.stores+'店のロイヤリティ','+'+fmt(r.roy));
+  if(r.roy>0)row(ASSETS.shop1,'フランチャイズ'+r.stores+'店','+'+fmt(r.roy));
   for(const [m,a,b,site] of r.lvs)row(mgrImg(m),site+'店 '+m.name+'店長','Lv'+a+' → '+b,'lv');
   if(r.asks)row(ASSETS.ask0,'店長からの相談','届いています '+r.asks+'件','ask');
   const tot=r.hon+r.roy;document.getElementById('repTot').textContent='+'+fmt(tot)+' ジェム';
@@ -1648,13 +1657,13 @@ norenPill.addEventListener('click',()=>{audioInit();openMap()});
 document.getElementById('mapHon').addEventListener('click',()=>{closeMap()});
 document.getElementById('siteX').addEventListener('click',()=>closeSite());
 siteEl.addEventListener('click',e=>{if(e.target===siteEl)closeSite()});
-function openMap(){if(!S.fc)return;mapEl.hidden=false;joy=null;payHold=false;mapR=Math.min(mapR,S.reg||0);renderMap()}
-function closeMap(){mapEl.hidden=true;closeSite();snapCam=true}
-function closeSite(){siteEl.hidden=true;siteCur=null;cands=null}
+function openMap(){if(!S.fc)return;mapEl.hidden=false;document.body.classList.add('map-on');joy=null;payHold=false;mapR=Math.min(mapR,S.reg||0);renderMap()}
+function closeMap(){mapEl.hidden=true;document.body.classList.remove('map-on');closeSite();snapCam=true}
+function closeSite(){siteEl.hidden=true;document.body.classList.remove('site-on');siteCur=null;cands=null}
 function renderMap(){mapRefs=[];const R=REGIONS[mapR];document.getElementById('mHqImg').src=hqImg();
   /* tabs */
   const tabs=document.getElementById('mapTabs');tabs.textContent='';
-  REGIONS.forEach((r,ri)=>{const t=mk1('button','mtab'+(ri===mapR?' on':''),(ri>(S.reg||0)?'🔒 ':'')+r.n+(ri?' ×'+r.mul:''));t.type='button';t.setAttribute('aria-pressed',String(ri===mapR));t.addEventListener('click',()=>{mapR=ri;renderMap()});tabs.appendChild(t)});
+  REGIONS.forEach((r,ri)=>{const t=mk1('button','mtab'+(ri===mapR?' on':''),(ri>(S.reg||0)?'🔒':'')+r.n+(ri?'×'+r.mul:''));t.type='button';t.setAttribute('aria-pressed',String(ri===mapR));t.addEventListener('click',()=>{mapR=ri;renderMap()});tabs.appendChild(t)});
   mapBox.textContent='';mapBox.style.background=R.bg;
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');svg.classList.add('mroad');
   const pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');pl.setAttribute('points',[R.sites[0],R.sites[1],R.sites[3],R.sites[2],R.sites[0]].map(s=>s.x+','+s.y).join(' '));svg.appendChild(pl);mapBox.appendChild(svg);
@@ -1691,7 +1700,7 @@ function makeCands(site){const q=honQ(),out=[],used=new Set((S.branches||[]).map
   const trs=['ryori','sekkyaku','dandori'].sort(()=>Math.random()-.5);if(site.aff&&!trs.slice(0,3).includes(site.aff))trs[0]=site.aff;
   for(let k=0;k<3;k++){const b=Math.round(q*3);const sk={ryori:Math.max(0,b+(Math.random()*3|0)-1),sekkyaku:Math.max(0,b+(Math.random()*3|0)-1),dandori:Math.max(0,b+(Math.random()*3|0)-1)};sk[trs[k]]+=1;out.push(newMgr(sk,trs[k],names[k]))}
   return out}
-function openSite(s){siteCur=s;cands=null;siteEl.hidden=false;renderSite()}
+function openSite(s){siteCur=s;cands=null;siteEl.hidden=false;document.body.classList.add('site-on');renderSite()}
 function storeCard(b){const m=ensureMgr(b),c=mk1('div','oc');
   const si=mk1('img','oshop');si.src=shopImg(m);si.alt=TRAITS[m.trait]+'の店';c.appendChild(si);
   const top=mk1('div','ot');const im=mk1('img','oface');im.src=mgrImg(m);im.alt='';
