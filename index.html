@@ -292,7 +292,13 @@ Object.assign(ASSETS,{"mgr0": "data:image/webp;base64,UklGRvgZAABXRUJQVlA4WAoAAA
 (()=>{
 const cv=document.getElementById('c');
 const FONT='"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Noto Sans JP",sans-serif';
-const W=720,AH=600,TOP0=20,KEY='hyogen-fish-3d-v1';
+const W=720,AH=600,TOP0=20;
+const TRIAL=/[?&]trial=owner\b/.test(location.search),KEY=TRIAL?'hyogen-fish-3d-trial-owner':'hyogen-fish-3d-v1';
+if(TRIAL){try{if(!localStorage.getItem(KEY)){const z=()=>({net:0,fisher:0,nets:0,carrier:0,ad:0,cook:0,bag:0,unlock:0,sled:0,noren:0});const lv=Object.assign(z(),{net:1,fisher:1,carrier:1});
+  localStorage.setItem(KEY,JSON.stringify({wallet:2e9,served:12000,open:1,stack:[],noren:2,vipDone:3,goldSeen:1,hq:0,ownerSeen:0,lastAt:Date.now()-20*60e3,
+    A:[{lv,paid:z(),fish:0,stIn:0,dish:0,cnt:0,gem:0,cookT:0,spawnT:0,served:0}],
+    branches:[{no:1,open:30,rate:1700000,menu:'祭りの大舟盛り',mgr:{name:'ユキ',face:0,trait:'ryori',lv:1,xp:0,sk:{ryori:3,sekkyaku:2,dandori:2},mood:70,praiseT:0}},
+              {no:2,open:30,rate:2600000,menu:'祭りの大舟盛り',mgr:{name:'コタロウ',face:1,trait:'sekkyaku',lv:1,xp:0,sk:{ryori:2,sekkyaku:3,dandori:1},mood:55,praiseT:0}}]}))}}catch(e){}}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -1478,7 +1484,7 @@ const ASKS=[
  {q:'料理大会に招待されました。出ますか？',a:[['出場する',(b,m)=>{if(m.sk.ryori>=5){const g=Math.round(effRate(b)*600);S.wallet+=g;return'優勝！ 賞金 +'+fmt(g)+'ジェム'}m.mood+=8;m.xp+=120;return'入賞ならず。でもいい経験に（料理Lv5で優勝のチャンス）'}],['断る',(b,m)=>'また次の機会に']]},
  {q:'店長が「少し休みがほしい」と言っています。',a:[['休ませる',(b,m)=>{b.rest=60;m.mood=100;return'1分休んで、やる気満タン！'}],['もう少し頑張って',(b,m)=>{m.mood-=20;b.bf={m:1.2,t:300};return'5分間 稼ぎ1.2倍（やる気 −20）'}]]},
 ];
-let ASK=null,askT=60,awayPending=0,ownerShown=false;
+let ASK=null,askT=TRIAL?15:60,awayPending=0,ownerShown=false;
 function ownerTick(dt){
   const bs=S.branches||[];if(!bs.length)return;
   for(const b of bs){const m=ensureMgr(b);
@@ -1608,7 +1614,7 @@ awayCredit();
 paused=true;
 {const tEl=document.getElementById('title'),tStart=document.getElementById('tStart'),tNew=document.getElementById('tNew'),tInfo=document.getElementById('tInfo');
  const hasSave=S.served>0||S.open>1||S.A[0].lv.net>0||(S.noren||0)>0;let arm=0;
- if(hasSave){tStart.textContent='つづきから';tNew.hidden=false;tInfo.textContent='エリア'+S.open+(S.noren?'　'+(S.noren+1)+'号店':'')+'　来客'+fmt(S.served)+'人'}
+ if(TRIAL){tInfo.style.color='#ffe08a'}if(hasSave){tStart.textContent='つづきから';tNew.hidden=false;tInfo.textContent=(TRIAL?'【オーナー編お試し】':'')+'エリア'+S.open+(S.noren?'　'+(S.noren+1)+'号店':'')+'　来客'+fmt(S.served)+'人'}
  else tInfo.textContent=matchMedia('(hover:hover) and (pointer:fine)').matches?'矢印キーまたはドラッグで遊べます':'画面をドラッグして遊べます';
  const go=()=>{audioInit();sfx('level');tEl.classList.add('out');setTimeout(()=>{tEl.hidden=true;paused=false},480);try{window.focus()}catch(_){}};
  tStart.addEventListener('click',go);
