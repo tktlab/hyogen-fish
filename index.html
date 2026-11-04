@@ -24,8 +24,8 @@ html,body{height:100%;overflow:hidden;background:var(--ice);color:var(--snow);fo
 .pill small{font-size:11px;font-weight:500;opacity:.8}
 .gemi{width:16px;height:16px;background:var(--gem);transform:rotate(45deg) scale(.8);border-radius:3px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.18)}
 #shareBtn{margin-left:auto}
-#reset{pointer-events:auto;font:500 12px var(--font);color:var(--snow);background:var(--panel);border:0;border-radius:999px;padding:8px 12px;cursor:pointer;white-space:nowrap}
-#reset:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
+#setBtn{pointer-events:auto;font:500 12px var(--font);color:var(--snow);background:var(--panel);border:0;border-radius:999px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+#setBtn:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 #goal{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 54px);background:var(--snow);color:var(--ink);font-weight:800;font-size:14px;padding:8px 16px;border-radius:12px;box-shadow:0 4px 0 rgba(31,43,58,.15);white-space:nowrap;pointer-events:none;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 28px);background:var(--panel);color:var(--snow);font-size:14px;padding:10px 18px;border-radius:999px;pointer-events:none;white-space:nowrap}
 #ov{position:fixed;inset:0;pointer-events:none;overflow:hidden}
@@ -214,9 +214,27 @@ body.kbd #keyhelp{display:block}
 .go{align-self:flex-end;border:0;border-radius:999px;background:#2f6fd0;color:#fff;font:800 12px var(--font);padding:6px 12px;cursor:pointer}
 .achip{position:absolute;left:0;top:0;white-space:nowrap;font-weight:800;font-size:12px;background:#ff7a45;color:#fff;padding:4px 10px;border-radius:999px;box-shadow:0 3px 0 rgba(10,14,28,.35)}
 #joyk{width:48px;height:48px;background:rgba(255,255,255,.85)}
+#settings{position:fixed;inset:0;background:rgba(10,14,28,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+#settings .sheet{width:100%;max-width:440px;max-height:86vh;display:flex;flex-direction:column;background:#f4f1ea;color:#1f2b3a;border-radius:20px 20px 0 0;padding-block:14px calc(env(safe-area-inset-bottom,0px) + 14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#settings .hd{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:17px;margin-bottom:8px}
+#settings .hd button{border:0;background:#dfe3ea;border-radius:999px;padding:6px 14px;font:500 13px var(--font);cursor:pointer;color:#1f2b3a}
+#setList{overflow-y:auto;display:flex;flex-direction:column;gap:12px;min-height:0}
+#setList section{background:#fff;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 0 rgba(31,43,58,.1)}
+#setList h3{margin:0;font-size:12px;color:#6a7486;font-weight:800}
+.srow{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
+.srow>span{flex:1;min-width:0;display:flex;flex-direction:column}.srow small{font-size:11px;font-weight:500;color:#6a7486;line-height:1.4}
+.srow input[type=range]{flex:1.4;min-width:0;accent-color:#22c36b;height:28px}
+.sw{position:relative;flex:none;width:64px;height:32px;border:0;border-radius:999px;background:#22c36b;color:#fff;font:800 11px var(--font);cursor:pointer;padding:0 30px 0 8px;text-align:left;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:right .15s}
+.sw.off{background:#b8bfcc;padding:0 8px 0 30px;text-align:right}.sw.off::after{right:35px}
+.sbtn{border:0;border-radius:12px;padding:12px;font:800 14px var(--font);background:#e8ebf0;color:#1f2b3a;cursor:pointer;text-align:center}
+.sbtn.danger{background:#fff;color:#c9472f;border:2px solid #e4b3a8}
+.sbtn.restore{background:#fff6dc;color:#7a4a00}
+#settings button:focus-visible,#settings input:focus-visible{outline:3px solid #2f6fd0;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.sw,.sw::after{transition:none}}
 @media (max-width:430px){#hud{gap:5px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
   #hud .pill{font-size:14px;padding:5px 9px 5px 7px;gap:4px}#hud .pill small{font-size:10px}
-  #shareBtn,#reset{font-size:11px;padding:7px 9px}}
+  #shareBtn,#setBtn{font-size:11px;padding:7px 9px}}
 @media (max-width:370px){#hud .pill.vis{display:none}}
 body.map-on #banner{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 98px)}
 body.site-on #banner{top:calc(env(safe-area-inset-top,0px) + 8px);bottom:auto}
@@ -320,7 +338,7 @@ body.site-on #banner{top:calc(env(safe-area-inset-top,0px) + 8px);bottom:auto}
   <div class="pill vis"><small>来客</small><b id="served">0</b></div>
   <button class="pill" id="areaBtn" type="button" aria-label="エリアを選んで移動"><small>エリア</small><b id="areas">1</b><span id="areaDot" hidden></span></button>
   <button id="shareBtn" type="button">共有</button>
-  <button id="reset" type="button">リセット</button>
+  <button id="setBtn" type="button" aria-haspopup="dialog">設定</button>
 </div>
 <div id="aurora"></div>
 <div id="goal" hidden></div>
@@ -344,10 +362,23 @@ body.site-on #banner{top:calc(env(safe-area-inset-top,0px) + 8px);bottom:auto}
 <div class="xpane" hidden><p>送る側の端末でコピーしたリンクを、ここに貼り付けてください。QRコードやリンクを開いた場合は、自動で受け取り画面になります。</p><textarea id="xIn" placeholder="https://tktlab.github.io/hyogen-fish/#data=…" aria-label="引き継ぎリンク"></textarea><div id="xMsg"></div><div class="row"><button id="xRecv" type="button">受け取る</button></div></div>
 <button id="xClose" type="button">閉じる</button></div></div>
 <div id="report" hidden><div class="card" role="dialog" aria-labelledby="repH"><img class="rown" src="" alt="" id="repImg"><h2 id="repH">留守中の日報</h2><p id="repSub"></p><div id="repList"></div><div class="rtot"><span>合計</span><b id="repTot"></b></div><button id="repOk" type="button">受け取る</button><p class="rnote" id="repNote"></p></div></div>
+<div id="settings" hidden><div class="sheet" role="dialog" aria-labelledby="setH"><div class="hd"><span id="setH">設定</span><button id="setX" type="button">閉じる</button></div><div id="setList">
+<section><h3>音</h3>
+<div class="srow"><span>BGM</span><input id="volB" type="range" min="0" max="100" step="5" aria-label="BGMの音量"><button id="sndb" class="sw" type="button" aria-label="BGM"></button></div>
+<div class="srow"><span>効果音</span><input id="volS" type="range" min="0" max="100" step="5" aria-label="効果音の音量"><button id="snds" class="sw" type="button" aria-label="効果音"></button></div></section>
+<section><h3>表示</h3>
+<div class="srow"><span>大きなお知らせ演出<small>オフにすると、画面上の小さなお知らせ帯で知らせます</small></span><button id="setCut" class="sw" type="button" aria-label="大きなお知らせ演出"></button></div>
+<div class="srow"><span>軽量モード<small>画面が重いときにオン。画質を少し下げて動きを軽くします</small></span><button id="setLite" class="sw" type="button" aria-label="軽量モード"></button></div></section>
+<section><h3>データ</h3>
+<button id="setXfer" class="sbtn" type="button">データ引き継ぎ（スマホ⇔パソコン）</button>
+<button id="setShare" class="sbtn" type="button">友だちに教える（QRコード）</button>
+<button id="setRestore" class="sbtn" type="button" hidden></button>
+<button id="reset" class="sbtn danger" type="button">リセット（最初からやり直す）</button></section>
+</div></div></div>
 <div id="cutin" hidden></div>
 <div id="banner" hidden></div>
 <div id="toast" hidden><b id="toastT"></b><span id="toastS"></span></div>
-<div id="snd"><button id="shopb" type="button" aria-label="店の様子" hidden>店の<br>様子<span id="shopDot" hidden></span></button><button id="sndb" type="button" aria-label="BGM">BGM</button><button id="snds" type="button" aria-label="効果音">SE</button></div>
+<div id="snd"><button id="shopb" type="button" aria-label="店の様子" hidden>店の<br>様子<span id="shopDot" hidden></span></button></div>
 <div id="hint">画面をドラッグして移動</div>
 <div id="keyhelp" aria-hidden="true"><div><kbd>←↑↓→</kbd>移動（WASDも可）</div><div><kbd>Space</kbd>長押しでジェムを使う</div><div><kbd>E</kbd>エリア移動　<kbd>Q</kbd>店の様子　<kbd>M</kbd>地図</div><div><kbd>Enter</kbd>お知らせを閉じる</div></div>
 <button id="pay" type="button" hidden><span id="payt">長押しでジェムを使う</span><small id="pays"></small></button>
@@ -451,7 +482,7 @@ const endJoy=e=>{if(joy&&joy.id===e.pointerId)joy=null};
 cv.addEventListener('pointerup',endJoy);cv.addEventListener('pointercancel',endJoy);
 const KEYMAP={ArrowLeft:'L',KeyA:'L',ArrowRight:'R',KeyD:'R',ArrowUp:'U',KeyW:'U',ArrowDown:'D',KeyS:'D'};let kbd=false;
 addEventListener('keydown',e=>{const k=KEYMAP[e.code];if(k){keys[k]=true;e.preventDefault();if(!kbd){kbd=true;document.body.classList.add('kbd');hint.textContent='矢印キーで移動';}}
-  if(e.code==='Escape'){const se=document.getElementById('site');if(se&&!se.hidden){document.getElementById('siteX').click();return}if(typeof closeWarp==='function')closeWarp();const sh=document.getElementById('shop');if(sh)sh.hidden=true;if(typeof CUT!=='undefined'&&CUT.busy)endCut()}
+  if(e.code==='Escape'){const st=document.getElementById('settings');if(st&&!st.hidden){st.hidden=true;return}const se=document.getElementById('site');if(se&&!se.hidden){document.getElementById('siteX').click();return}if(typeof closeWarp==='function')closeWarp();const sh=document.getElementById('shop');if(sh)sh.hidden=true;if(typeof CUT!=='undefined'&&CUT.busy)endCut()}
   if((e.code==='Enter'||e.code==='NumpadEnter')&&typeof CUT!=='undefined'&&CUT.busy){e.preventDefault();endCut()}
   else if((e.code==='Enter'||e.code==='NumpadEnter')){const rp=document.getElementById('report');if(rp&&!rp.hidden){e.preventDefault();document.getElementById('repOk').click()}}
   if(e.code==='KeyE'&&typeof warpReady==='function'&&warpReady()&&!paused){warpEl.hidden?openWarp():closeWarp()}
@@ -466,7 +497,7 @@ function doReset(){try{const cur=localStorage.getItem(KEY);if(cur)localStorage.s
   S={wallet:0,served:0,open:1,A:[newArea()],noren:0,vipDone:0};VIP=null;ASK=null;WX.type=null;SLED.area=0;SLED.y=T(0)+205;resetWorld3d();player.stack=[];player.x=420;player.y=170;workers=[];custs=[];flyers=[];floats=[];initFish();
   try{localStorage.removeItem(KEY)}catch(e){}}
 resetBtn.addEventListener('pointerdown',e=>e.stopPropagation());
-resetBtn.addEventListener('click',()=>openConfirm());
+resetBtn.addEventListener('click',()=>{document.getElementById('settings').hidden=true;openConfirm()});
 const cfEl=document.getElementById('confirm'),cfNo=document.getElementById('cfNo'),cfYes=document.getElementById('cfYes'),cfMsg=document.getElementById('cfMsg');let cfTimer=0,cfWasPaused=false;
 cfEl.addEventListener('pointerdown',e=>e.stopPropagation());
 let cfAt=0;
@@ -642,7 +673,7 @@ function update(dt){
 
 /* ================= sound: BGM + SE (Web Audio, all synthesized) ================= */
 const AU={ctx:null,bgmOn:true,seOn:true,last:{}};
-try{const v=JSON.parse(localStorage.getItem('hyogen-fish-sound')||'null');if(v){AU.bgmOn=!!v.b;AU.seOn=!!v.s}}catch(e){}
+AU.bv=1;AU.sv=1;try{const v=JSON.parse(localStorage.getItem('hyogen-fish-sound')||'null');if(v){AU.bgmOn=!!v.b;AU.seOn=!!v.s;if(isFinite(v.bv))AU.bv=v.bv;if(isFinite(v.sv))AU.sv=v.sv}}catch(e){}
 function audioInit(){
   if(AU.ctx){if(AU.ctx.state==='suspended')AU.ctx.resume();return}
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
@@ -652,8 +683,8 @@ function audioInit(){
   const len=c.sampleRate*2.2,ir=c.createBuffer(2,len,c.sampleRate);
   for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
   AU.rev=c.createConvolver();AU.rev.buffer=ir;const rg=c.createGain();rg.gain.value=.32;AU.rev.connect(rg);rg.connect(AU.master);
-  AU.bgm=c.createGain();AU.bgm.gain.value=AU.bgmOn?.34:0;AU.bgm.connect(AU.master);AU.bgm.connect(AU.rev);
-  AU.se=c.createGain();AU.se.gain.value=AU.seOn?.55:0;AU.se.connect(AU.master);
+  AU.bgm=c.createGain();AU.bgm.gain.value=AU.bgmOn?.34*AU.bv:0;AU.bgm.connect(AU.master);AU.bgm.connect(AU.rev);
+  AU.se=c.createGain();AU.se.gain.value=AU.seOn?.55*AU.sv:0;AU.se.connect(AU.master);
   const seRev=c.createGain();seRev.gain.value=.35;AU.se.connect(seRev);seRev.connect(AU.rev);
   const nb=c.createBuffer(1,c.sampleRate,c.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;AU.noise=nb;
   startBGM();
@@ -714,15 +745,39 @@ function schedBGM(){
     if(bgmStep%(8*32)===0)motif=[makeMotif(),makeMotif()];
   }
 }
-function setSound(){if(AU.ctx){const t=AU.ctx.currentTime;AU.bgm.gain.setTargetAtTime(AU.bgmOn?.34:0,t,.2);AU.se.gain.setTargetAtTime(AU.seOn?.55:0,t,.05)}
-  sndB.classList.toggle('off',!AU.bgmOn);sndS.classList.toggle('off',!AU.seOn);sndB.setAttribute('aria-pressed',AU.bgmOn);sndS.setAttribute('aria-pressed',AU.seOn);
-  try{localStorage.setItem('hyogen-fish-sound',JSON.stringify({b:AU.bgmOn,s:AU.seOn}))}catch(e){}}
+function setSound(){if(AU.ctx){const t=AU.ctx.currentTime;AU.bgm.gain.setTargetAtTime(AU.bgmOn?.34*AU.bv:0,t,.2);AU.se.gain.setTargetAtTime(AU.seOn?.55*AU.sv:0,t,.05)}
+  setSw(sndB,AU.bgmOn);setSw(sndS,AU.seOn);volB.value=Math.round(AU.bv*100);volS.value=Math.round(AU.sv*100);volB.disabled=!AU.bgmOn;volS.disabled=!AU.seOn;
+  try{localStorage.setItem('hyogen-fish-sound',JSON.stringify({b:AU.bgmOn,s:AU.seOn,bv:AU.bv,sv:AU.sv}))}catch(e){}}
+function setSw(b,on){b.classList.toggle('off',!on);b.setAttribute('aria-pressed',String(on));const t=on?'オン':'オフ';if(b.textContent!==t)b.textContent=t}
+const volB=document.getElementById('volB'),volS=document.getElementById('volS');
+volB.addEventListener('input',()=>{audioInit();AU.bv=volB.value/100;setSound()});
+volS.addEventListener('input',()=>{AU.sv=volS.value/100;setSound()});
+volS.addEventListener('change',()=>{audioInit();sfx('coin')});
 const sndB=document.getElementById('sndb'),sndS=document.getElementById('snds');
 const stopEv=e=>{e.stopPropagation()};
 sndB.addEventListener('pointerdown',stopEv);sndS.addEventListener('pointerdown',stopEv);
 sndB.addEventListener('click',()=>{audioInit();AU.bgmOn=!AU.bgmOn;setSound()});
 sndS.addEventListener('click',()=>{audioInit();AU.seOn=!AU.seOn;setSound()});
 setSound();
+/* settings sheet */
+const SET={cut:true,lite:false};try{Object.assign(SET,JSON.parse(localStorage.getItem('hyogen-fish-settings')||'{}'))}catch(e){}
+const setEl=document.getElementById('settings'),setCutB=document.getElementById('setCut'),setLiteB=document.getElementById('setLite');
+function saveSet(){try{localStorage.setItem('hyogen-fish-settings',JSON.stringify(SET))}catch(e){}setSw(setCutB,SET.cut);setSw(setLiteB,SET.lite)}
+saveSet();
+setEl.addEventListener('pointerdown',e=>e.stopPropagation());
+setEl.addEventListener('click',e=>{if(e.target===setEl)closeSet()});
+function openSet(){setEl.hidden=false;joy=null;payHold=false;
+  const r=document.getElementById('setRestore');let bk=null;try{bk=JSON.parse(localStorage.getItem(BKEY)||'null')}catch(e){}
+  r.hidden=!(bk&&bk.data);if(!r.hidden){r.className='sbtn restore';r.textContent='リセット前・引き継ぎ前のデータに戻す（エリア'+bk.open+'）';r.onclick=()=>{if(r.dataset.arm!=='1'){r.dataset.arm='1';r.textContent='もう一度押すと戻します（今のデータは消えます）';return}
+    noSave=true;try{localStorage.setItem(KEY,bk.data);localStorage.removeItem(BKEY)}catch(e){}location.reload()};r.dataset.arm=''}}
+function closeSet(){setEl.hidden=true}
+document.getElementById('setBtn').addEventListener('pointerdown',e=>e.stopPropagation());
+document.getElementById('setBtn').addEventListener('click',()=>{audioInit();setEl.hidden?openSet():closeSet()});
+document.getElementById('setX').addEventListener('click',closeSet);
+setCutB.addEventListener('click',()=>{SET.cut=!SET.cut;saveSet()});
+setLiteB.addEventListener('click',()=>{SET.lite=!SET.lite;saveSet();if(typeof resize==='function')resize()});
+document.getElementById('setXfer').addEventListener('click',()=>{closeSet();document.getElementById('tXfer').click()});
+document.getElementById('setShare').addEventListener('click',()=>{closeSet();document.getElementById('shareBtn').click()});
 addEventListener('pointerdown',audioInit,{capture:true});addEventListener('keydown',audioInit);
 document.addEventListener('visibilitychange',()=>{if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else AU.ctx.resume()});
 
@@ -731,7 +786,7 @@ let paused=false;
 const cutEl=document.getElementById('cutin'),banEl=document.getElementById('banner');
 const CUT={q:[],busy:false,t0:0,timer:0},BAN={q:[],busy:false,timer:0};
 function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
-function cutin(o){CUT.q.push(o);if(!CUT.busy)nextCut()}
+function cutin(o){if(typeof SET!=='undefined'&&!SET.cut){banner({img:(o.imgs||[])[0],theme:o.theme==='ice'||o.theme==='aurora'?'ice':o.theme==='fest'?'fest':'gold',kicker:o.kicker,title:o.title,sub:o.sub,sfx:'level',dur:3600});return}CUT.q.push(o);if(!CUT.busy)nextCut()}
 function nextCut(){const o=CUT.q.shift();
   if(!o){CUT.busy=false;paused=false;cutEl.hidden=true;return}
   CUT.busy=true;paused=true;joy=null;payHold=false;cutEl.textContent='';cutEl.className='ci-'+(o.theme||'gold');
@@ -1343,7 +1398,7 @@ const snow=new THREE.Points(snowGeo,new THREE.PointsMaterial({color:'#ffffff',si
 
 /* ---------- sizing & camera ---------- */
 let cw=1,ch=1,camDist=60;const camT=new THREE.Vector3(SX(330),0,SZ(180));const ELEV=46*Math.PI/180;
-function resize(){cw=innerWidth;ch=innerHeight;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));renderer.setSize(cw,ch,false);camera.aspect=cw/ch;camera.updateProjectionMatrix();
+function resize(){cw=innerWidth;ch=innerHeight;renderer.setPixelRatio(typeof SET!=='undefined'&&SET.lite?1:Math.min(devicePixelRatio||1,1.75));renderer.setSize(cw,ch,false);camera.aspect=cw/ch;camera.updateProjectionMatrix();
   const tv=Math.tan(camera.fov*Math.PI/360),th=tv*camera.aspect;camDist=Math.max(9.6/th,12/tv)}
 addEventListener('resize',resize);resize();
 
